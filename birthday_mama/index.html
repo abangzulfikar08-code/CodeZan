@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun Mama!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎉 Selamat Ulang Tahun Mama! 🎂</h1>
+            <p class="subtitle">Hari spesial untuk wanita terhebat dalam hidup kami</p>
+        </header>
+
+        <!-- Kue dan Pesan -->
+        <section class="hero">
+            <div class="cake">🎂</div>
+            <div class="message">
+                <h2><i class="fas fa-heart"></i> Untuk Mama Tercinta</h2>
+                <p>Hari ini adalah hari yang sangat istimewa. Semoga Mama selalu sehat, bahagia, dan dikelilingi cinta.</p>
+                <p>Terima kasih untuk semua pengorbanan dan kasih sayang yang Mama berikan.</p>
+                <div class="wish-text">"Selamat Ulang Tahun ke-<span id="age">48</span>!"</div>
+            </div>
+        </section>
+
+        <!-- Waktu -->
+        <section class="time-section">
+            <h3><i class="fas fa-clock"></i> Waktu Sekarang</h3>
+            <div class="time-display">
+                <div class="time-box">
+                    <span id="hours">00</span>
+                    <small>Jam</small>
+                </div>
+                <div class="time-box">
+                    <span id="minutes">00</span>
+                    <small>Menit</small>
+                </div>
+                <div class="time-box">
+                    <span id="seconds">00</span>
+                    <small>Detik</small>
+                </div>
+            </div>
+            <p>Setiap detik bersama Mama adalah berharga</p>
+        </section>
+
+        <!-- Tombol -->
+        <section class="buttons">
+            <a href="wishes.html" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Baca Ucapan
+            </a>
+            <button class="btn btn-secondary" id="music-btn">
+                <i class="fas fa-music"></i> <span id="music-text">Putar Musik</span>
+            </button>
+            <button class="btn btn-surprise" id="love-btn">
+                <i class="fas fa-heart"></i> Kirim Cinta
+            </button>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Dibuat dengan <i class="fas fa-heart" id="heart-icon"></i> oleh anak-anakmu</p>
+            <p id="date"></p>
+        </footer>
+    </div>
+
+    <!-- Pesan Cinta -->
+    <div id="love-message" class="love-message">
+        ❤️ I LOVE YOU MAMA! ❤️
+    </div>
+
+    <!-- Audio -->
+    <audio id="music" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-happy-birthday-to-you-443.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Update waktu
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('hours').textContent = now.getHours().toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = now.getSeconds().toString().padStart(2, '0');
+            
+            // Tanggal
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Musik
+        const audio = document.getElementById('music');
+        const musicBtn = document.getElementById('music-btn');
+        const musicText = document.getElementById('music-text');
+        
+        musicBtn.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play();
+                musicText.textContent = 'Jeda Musik';
+                musicBtn.style.background = 'linear-gradient(135deg, #ff9800, #ff5722)';
+            } else {
+                audio.pause();
+                musicText.textContent = 'Putar Musik';
+                musicBtn.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+            }
+        });
+
+        // Tampilkan cinta
+        const loveBtn = document.getElementById('love-btn');
+        loveBtn.addEventListener('click', showLove);
+        
+        function showLove() {
+            const love = document.getElementById('love-message');
+            love.style.display = 'block';
+            setTimeout(() => {
+                love.style.display = 'none';
+            }, 3000);
+            
+            // Buat hati-hati
+            for(let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤️';
+                    heart.style.position = 'fixed';
+                    heart.style.top = Math.random() * 100 + 'vh';
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                    heart.style.zIndex = '9999';
+                    heart.style.animation = 'float 3s forwards';
+                    document.body.appendChild(heart);
+                    
+                    setTimeout(() => heart.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        // Animasi float untuk hati
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0) scale(1); opacity: 1; }
+                100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+            }
+            #heart-icon {
+                color: #e91e63;
+                animation: heartbeat 1.5s infinite;
+            }
+            @keyframes heartbeat {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.3); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

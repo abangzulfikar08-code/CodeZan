@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ucapan untuk Mama</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="wishes-header">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <h1><i class="fas fa-heart"></i> Ucapan untuk Mama <i class="fas fa-heart"></i></h1>
+            <p class="subtitle">Kata-kata indah dari yang menyayangimu</p>
+        </header>
+
+        <!-- Ucapan -->
+        <section class="hero">
+            <div class="wishes-container">
+                <!-- Ucapan 1 -->
+                <div class="wish-card">
+                    <div class="wish-header">
+                        <h3><i class="fas fa-user"></i> Keluarga</h3>
+                        <span class="wish-time">Hari ini, 08:00</span>
+                    </div>
+                    <p class="wish-text">"Selamat Ulang Tahun Mama! Semoga selalu sehat, bahagia, dan dikelilingi oleh orang-orang yang mencintaimu. Terima kasih untuk segalanya."</p>
+                    <button class="like-btn"><i class="fas fa-heart"></i> <span>12</span></button>
+                </div>
+
+                <!-- Ucapan 2 -->
+                <div class="wish-card">
+                    <div class="wish-header">
+                        <h3><i class="fas fa-users"></i> Anak-anakmu</h3>
+                        <span class="wish-time">Hari ini, 08:30</span>
+                    </div>
+                    <p class="wish-text">"Mama tercinta, terima kasih atas semua pengorbanan dan kasih sayangmu. Kami akan selalu menyayangimu sepanjang masa!"</p>
+                    <button class="like-btn"><i class="fas fa-heart"></i> <span>15</span></button>
+                </div>
+
+                <!-- Ucapan 3 -->
+                <div class="wish-card">
+                    <div class="wish-header">
+                        <h3><i class="fas fa-star"></i> Semua yang menyayangimu</h3>
+                        <span class="wish-time">Hari ini, 09:00</span>
+                    </div>
+                    <p class="wish-text">"Panjang umur, sehat selalu, rezeki melimpah, dan bahagia dunia akhirat. Amin ya Allah."</p>
+                    <button class="like-btn"><i class="fas fa-heart"></i> <span>8</span></button>
+                </div>
+
+                <!-- Ucapan 4 -->
+                <div class="wish-card">
+                    <div class="wish-header">
+                        <h3><i class="fas fa-home"></i> Dari rumah</h3>
+                        <span class="wish-time">Hari ini, 09:30</span>
+                    </div>
+                    <p class="wish-text">"Mama adalah cahaya dalam keluarga. Semoga setiap hari membawa kebahagiaan baru untuk Mama."</p>
+                    <button class="like-btn"><i class="fas fa-heart"></i> <span>10</span></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Form Tambah Ucapan -->
+        <section class="form-section">
+            <h3><i class="fas fa-pen"></i> Tambahkan Ucapanmu</h3>
+            <div class="wish-form">
+                <input type="text" id="name-input" placeholder="Namamu..." maxlength="30">
+                <textarea id="message-input" placeholder="Tulis ucapan untuk Mama..." rows="3" maxlength="200"></textarea>
+                <button id="submit-btn" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Kirim Ucapan
+                </button>
+                <p id="form-message" class="form-message"></p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Semua ucapan penuh cinta untuk Mama tersayang ❤️</p>
+            <p><i class="fas fa-birthday-cake"></i> Happy Birthday Mama! <i class="fas fa-birthday-cake"></i></p>
+        </footer>
+    </div>
+
+    <script>
+        // Fungsi like untuk semua tombol like
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const span = this.querySelector('span');
+                let likes = parseInt(span.textContent);
+                likes++;
+                span.textContent = likes;
+                this.style.background = '#e91e63';
+                this.style.color = 'white';
+                this.innerHTML = `<i class="fas fa-heart"></i> <span>${likes}</span>`;
+                
+                // Animasi kecil
+                this.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 300);
+            });
+        });
+
+        // Fungsi tambah ucapan
+        document.getElementById('submit-btn').addEventListener('click', addWish);
+        
+        function addWish() {
+            const nameInput = document.getElementById('name-input');
+            const messageInput = document.getElementById('message-input');
+            const formMessage = document.getElementById('form-message');
+            
+            const name = nameInput.value.trim();
+            const message = messageInput.value.trim();
+            
+            // Validasi
+            if (!name || !message) {
+                formMessage.textContent = "Harap isi nama dan ucapan!";
+                formMessage.style.color = "#ff5722";
+                return;
+            }
+            
+            if (name.length > 30) {
+                formMessage.textContent = "Nama maksimal 30 karakter!";
+                formMessage.style.color = "#ff5722";
+                return;
+            }
+            
+            if (message.length > 200) {
+                formMessage.textContent = "Ucapan maksimal 200 karakter!";
+                formMessage.style.color = "#ff5722";
+                return;
+            }
+            
+            // Buat ucapan baru
+            const wishContainer = document.querySelector('.wishes-container');
+            const newWish = document.createElement('div');
+            newWish.className = 'wish-card';
+            newWish.innerHTML = `
+                <div class="wish-header">
+                    <h3><i class="fas fa-user-circle"></i> ${name}</h3>
+                    <span class="wish-time">Baru saja</span>
+                </div>
+                <p class="wish-text">"${message}"</p>
+                <button class="like-btn"><i class="fas fa-heart"></i> <span>0</span></button>
+            `;
+            
+            // Tambahkan event listener untuk like button baru
+            newWish.querySelector('.like-btn').addEventListener('click', function() {
+                const span = this.querySelector('span');
+                let likes = parseInt(span.textContent);
+                likes++;
+                span.textContent = likes;
+                this.style.background = '#e91e63';
+                this.style.color = 'white';
+                this.innerHTML = `<i class="fas fa-heart"></i> <span>${likes}</span>`;
+            });
+            
+            // Tambahkan di atas
+            wishContainer.insertBefore(newWish, wishContainer.firstChild);
+            
+            // Reset form
+            nameInput.value = '';
+            messageInput.value = '';
+            
+            // Tampilkan pesan sukses
+            formMessage.textContent = "Ucapan berhasil dikirim! Terima kasih ❤️";
+            formMessage.style.color = "#ffffff";
+            
+            // Animasi sukses
+            formMessage.style.opacity = '0';
+            formMessage.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                formMessage.style.transition = 'all 0.5s';
+                formMessage.style.opacity = '1';
+                formMessage.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // Hilangkan pesan setelah 3 detik
+            setTimeout(() => {
+                formMessage.style.opacity = '0';
+                setTimeout(() => {
+                    formMessage.textContent = '';
+                    formMessage.style.opacity = '1';
+                }, 500);
+            }, 3000);
+        }
+
+        // Enter untuk submit
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addWish();
+            }
+        });
+    </script>
+</body>
+</html>
