@@ -1,5 +1,5 @@
 /* Logika Dashboard Keuangan - keuangan.js */
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzdrkfFtFlGlM9yF0SAp-4gmURm-AJjPxWTqQgXiuGDox9a1S0UbhntrmakIu2E4ypLUQ/exec";
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbywejPJ7oXc6uyFCsNe-ANVemScQeSYQcLAy6pruL516J1IFhYqYCEPgTyUgaulXjngnQ/exec";
 
 let currentUser = null;
 let userData = {
@@ -10,13 +10,13 @@ let userData = {
 let catChartInstance = null;
 let dailyChartInstance = null;
 
-// Inisialisasi Sistem
+// Inisialisasi Sistem & Fetch Data dari Google Sheets
 window.onload = function() {
     const savedUser = localStorage.getItem('finance_active_user');
     if (savedUser) {
         currentUser = savedUser;
-        loadUserData();
         showDashboard();
+        loadDataFromSheet();
     }
 };
 
@@ -24,6 +24,8 @@ function showToast(msg, isSuccess = true) {
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toast-msg');
     const toastIcon = document.getElementById('toast-icon');
+
+    if (!toast || !toastMsg || !toastIcon) return;
 
     toastMsg.innerText = msg;
     toastIcon.className = isSuccess ? "fas fa-check-circle text-accentgreen text-xl" : "fas fa-exclamation-circle text-accentred text-xl";
@@ -42,16 +44,16 @@ function handleAuthLogin() {
     }
     currentUser = userIn.toLowerCase();
     localStorage.setItem('finance_active_user', currentUser);
-    loadUserData();
     showDashboard();
+    loadDataFromSheet();
     showToast('Selamat datang kembali, ' + currentUser);
 }
 
 function handleGuestLogin() {
     currentUser = 'guest_demo';
     localStorage.setItem('finance_active_user', currentUser);
-    loadUserData();
     showDashboard();
+    loadDataFromSheet();
     showToast('Masuk dalam Mode Tamu / Demo');
 }
 
@@ -62,20 +64,37 @@ function handleLogout() {
     document.getElementById('auth-screen').classList.remove('hidden');
 }
 
-function loadUserData() {
-    const raw = localStorage.getItem('finance_db_' + currentUser);
-    if (raw) {
-        userData = JSON.parse(raw);
-    } else {
-        userData = {
-            balance: 1000000, // Default Modal Awal
-            transactions: []
-        };
-        saveUserData();
-    }
+// Ambil Data dari Google Sheets secara Otomatis
+function loadDataFromSheet() {
+    showToast('Mengambil data dari Cloud...');
+    fetch(GOOGLE_SHEET_URL)
+        .then(res => res.json())
+        .then(data => {
+            if (Array.isArray(data)) {
+                userData.transactions = data.reverse(); // Transaksi terbaru di atas
+                
+                // Hitung Ulang Total Saldo berdasarkan Pemasukan - Pengeluaran
+                let calcBalance = 0;
+                userData.transactions.forEach(t => {
+                    const amt = parseFloat(t.amount) || 0;
+                    if (t.type === 'income') calcBalance += amt;
+                    else calcBalance -= amt;
+                });
+                
+                userData.balance = calcBalance;
+                updateUI();
+                showToast('Data berhasil disinkronisasi!');
+            }
+        })
+        .catch(err => {
+            console.error('Gagal mengambil data:', err);
+            const raw = localStorage.getItem('finance_db_' + currentUser);
+            if (raw) userData = JSON.parse(raw);
+            updateUI();
+        });
 }
 
-function saveUserData() {
+function saveUserDataLocal() {
     if (!currentUser) return;
     localStorage.setItem('finance_db_' + currentUser, JSON.stringify(userData));
     updateUI();
@@ -89,7 +108,7 @@ function showDashboard() {
 }
 
 function formatIDR(val) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
 }
 
 function updateUI() {
@@ -99,8 +118,9 @@ function updateUI() {
     let totalExpense = 0;
 
     userData.transactions.forEach(t => {
-        if (t.type === 'income') totalIncome += parseFloat(t.amount);
-        if (t.type === 'expense') totalExpense += parseFloat(t.amount);
+        const amt = parseFloat(t.amount) || 0;
+        if (t.type === 'income') totalIncome += amt;
+        if (t.type === 'expense') totalExpense += amt;
     });
 
     document.getElementById('display-total-income').innerText = formatIDR(totalIncome);
@@ -148,48 +168,40 @@ function handleAddTransaction(e) {
         desc
     };
 
-    // 1. Simpan Lokal di Browser HP
+    // Update Tampilan Lokal
     userData.transactions.unshift(newTx);
-    if (type === 'income') {
-        userData.balance += amount;
-    } else {
-        userData.balance -= amount;
-    }
-    saveUserData();
+    if (type === 'income') userData.balance += amount;
+    else userData.balance -= amount;
+    
+    saveUserDataLocal();
+    document.getElementById('tx-form').reset();
 
-    // 2. Kirim Otomatis ke Google Sheets
+    // Kirim Otomatis ke Google Sheets
     fetch(GOOGLE_SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTx)
     })
     .then(() => {
-        showToast('Transaksi berhasil disimpan & ter-sync ke Google Sheets!');
+        showToast('Transaksi disimpan ke Google Sheets!');
     })
-    .catch(error => {
-        console.error('Error Sync Google Sheets:', error);
-        showToast('Tersimpan di HP (Gagal Sync Cloud)', false);
+    .catch(err => {
+        console.error('Error Sync:', err);
+        showToast('Gagal simpan ke Cloud', false);
     });
-
-    document.getElementById('tx-form').reset();
 }
 
 function deleteTransaction(id) {
     const tx = userData.transactions.find(t => t.id === id);
     if (!tx) return;
 
-    if (tx.type === 'income') {
-        userData.balance -= tx.amount;
-    } else {
-        userData.balance += tx.amount;
-    }
+    if (tx.type === 'income') userData.balance -= tx.amount;
+    else userData.balance += tx.amount;
 
     userData.transactions = userData.transactions.filter(t => t.id !== id);
-    saveUserData();
-    showToast('Transaksi berhasil dihapus');
+    saveUserDataLocal();
+    showToast('Transaksi dihapus dari tampilan');
 }
 
 function handleTopUp() {
@@ -207,21 +219,18 @@ function handleTopUp() {
 
     userData.balance += amt;
     userData.transactions.unshift(topUpTx);
-    saveUserData();
+    saveUserDataLocal();
 
-    // Kirim Top Up ke Google Sheets
     fetch(GOOGLE_SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(topUpTx)
     });
 
     closeModal('topup-modal');
     document.getElementById('topup-amount').value = '';
-    showToast('Top up saldo berhasil & tersimpan ke Google Sheets!');
+    showToast('Top up saldo disimpan!');
 }
 
 function handleEditBalance() {
@@ -229,10 +238,10 @@ function handleEditBalance() {
     if (isNaN(amt) || amt < 0) return;
 
     userData.balance = amt;
-    saveUserData();
+    saveUserDataLocal();
     closeModal('edit-balance-modal');
     document.getElementById('edit-balance-amount').value = '';
-    showToast('Total saldo berhasil dikalibrasi');
+    showToast('Saldo dikalibrasi');
 }
 
 function renderTable() {
@@ -249,7 +258,7 @@ function renderTable() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-500">Belum ada riwayat transaksi recorded.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-500">Belum ada riwayat transaksi.</td></tr>`;
         return;
     }
 
@@ -331,25 +340,6 @@ function renderCharts() {
             plugins: { legend: { display: false } }
         }
     });
-}
-
-function exportToCSV() {
-    if (userData.transactions.length === 0) {
-        alert('Belum ada transaksi untuk diekspor.');
-        return;
-    }
-
-    let csv = 'ID,Tanggal,Tipe,Kategori,Deskripsi,Nominal\n';
-    userData.transactions.forEach(t => {
-        csv += `"${t.id}","${t.date}","${t.type}","${t.category}","${t.desc}","${t.amount}"\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `rekap_keuangan_${currentUser}.csv`);
-    a.click();
 }
 
 function openModal(id) {
