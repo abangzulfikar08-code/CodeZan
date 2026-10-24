@@ -1,4 +1,6 @@
 /* Logika Dashboard Keuangan - keuangan.js */
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzdrkfFtFlGlM9yF0SAp-4gmURm-AJjPxWTqQgXiuGDox9a1S0UbhntrmakIu2E4ypLUQ/exec";
+
 let currentUser = null;
 let userData = {
     balance: 0,
@@ -146,17 +148,33 @@ function handleAddTransaction(e) {
         desc
     };
 
+    // 1. Simpan Lokal di Browser HP
     userData.transactions.unshift(newTx);
-
     if (type === 'income') {
         userData.balance += amount;
     } else {
         userData.balance -= amount;
     }
-
     saveUserData();
+
+    // 2. Kirim Otomatis ke Google Sheets
+    fetch(GOOGLE_SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTx)
+    })
+    .then(() => {
+        showToast('Transaksi berhasil disimpan & ter-sync ke Google Sheets!');
+    })
+    .catch(error => {
+        console.error('Error Sync Google Sheets:', error);
+        showToast('Tersimpan di HP (Gagal Sync Cloud)', false);
+    });
+
     document.getElementById('tx-form').reset();
-    showToast('Transaksi berhasil ditambahkan!');
 }
 
 function deleteTransaction(id) {
@@ -178,20 +196,32 @@ function handleTopUp() {
     const amt = parseFloat(document.getElementById('topup-amount').value);
     if (!amt || amt <= 0) return;
 
-    userData.balance += amt;
-    userData.transactions.unshift({
+    const topUpTx = {
         id: Date.now(),
         date: new Date().toISOString().split('T')[0],
         type: 'income',
         category: 'RDPU Bibit',
         amount: amt,
         desc: 'Top Up Saldo Utama'
+    };
+
+    userData.balance += amt;
+    userData.transactions.unshift(topUpTx);
+    saveUserData();
+
+    // Kirim Top Up ke Google Sheets
+    fetch(GOOGLE_SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(topUpTx)
     });
 
-    saveUserData();
     closeModal('topup-modal');
     document.getElementById('topup-amount').value = '';
-    showToast('Top up saldo berhasil!');
+    showToast('Top up saldo berhasil & tersimpan ke Google Sheets!');
 }
 
 function handleEditBalance() {
