@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Keuangan Personal & Portfolio Tracker</title>
-    <!-- Tailwind CSS CDN -->
+    <title>CODEZAN . HUB</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome CDN -->
+    <!-- Chart.js (fix source map warning) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
@@ -17,293 +17,395 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0d1117',
-                        cardbg: '#161b22',
-                        bordercolor: '#30363d',
-                        accentgreen: '#2ea043',
-                        accentblue: '#58a6ff',
-                        accentred: '#f85149',
-                        accentyellow: '#d29922'
+                        darkbg: '#090d11',
+                        cardbg: '#12171f',
+                        bordercolor: '#212835',
+                        accentemerald: '#10b981',
+                        textgray: '#9ca3af'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-darkbg text-gray-200 min-h-screen pb-12">
+<body class="bg-darkbg text-gray-200 min-h-screen pb-12 relative overflow-x-hidden">
+
+    <!-- Subtle Gym Background Overlay -->
+    <div class="fixed inset-0 pointer-events-none z-0 bg-cover bg-center opacity-[0.03]" style="background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop');"></div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-cardbg border border-bordercolor text-white px-5 py-3 rounded-lg shadow-xl flex items-center space-x-3">
-        <i id="toast-icon" class="fas fa-check-circle text-accentgreen text-xl"></i>
-        <span id="toast-msg" class="text-sm font-medium">Transaksi berhasil disimpan!</span>
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-cardbg border border-bordercolor text-white px-5 py-3 rounded-lg shadow-2xl flex items-center space-x-3">
+        <i id="toast-icon" class="fas fa-check-circle text-accentemerald text-lg"></i>
+        <span id="toast-msg" class="text-xs font-mono font-medium">System Ready</span>
     </div>
 
-    <!-- Halaman Auth (Login / Register) -->
+    <!-- Authentication Screen -->
     <div id="auth-screen" class="fixed inset-0 z-40 bg-darkbg flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-bordercolor rounded-2xl p-8 max-w-md w-full shadow-2xl">
+        <div class="bg-cardbg border border-bordercolor rounded-xl p-8 max-w-md w-full shadow-2xl relative z-10">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accentgreen/10 text-accentgreen mb-4">
-                    <i class="fas fa-wallet text-2xl"></i>
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-accentemerald/10 text-accentemerald mb-3 border border-accentemerald/20">
+                    <i class="fas fa-terminal text-xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-white">Smart Finance Hub</h1>
-                <p class="text-xs text-gray-400 mt-1">Kelola Keuangan & Alokasi Portofolio Jangka Panjang</p>
+                <h1 class="text-xl font-mono font-bold text-white tracking-wider">CODEZAN . HUB</h1>
+                <p class="text-xs text-textgray mt-1 font-mono">Personal Finance & Bulking System</p>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Username / ID Akun</label>
-                    <input type="text" id="auth-username" class="w-full bg-darkbg border border-bordercolor rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accentblue" placeholder="Masukkan username kamu">
+                    <label class="block text-[11px] font-mono text-textgray mb-1">USER_ID</label>
+                    <input type="text" id="auth-username" class="w-full bg-darkbg border border-bordercolor rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-accentemerald font-mono" placeholder="Masukkan username">
                 </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Password</label>
-                    <input type="password" id="auth-password" class="w-full bg-darkbg border border-bordercolor rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accentblue" placeholder="••••••••">
-                </div>
-                <button onclick="handleAuthLogin()" class="w-full bg-accentgreen hover:bg-green-600 text-white font-semibold py-2.5 rounded-lg transition text-sm shadow-lg mt-2">
-                    Masuk ke Dashboard
+                <button type="button" onclick="Auth.login()" class="w-full bg-accentemerald hover:bg-emerald-600 text-darkbg font-mono font-bold py-2.5 rounded-lg transition text-xs shadow-lg">
+                    INITIALIZE SYSTEM
                 </button>
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-bordercolor"></div>
-                    <span class="flex-shrink mx-4 text-xs text-gray-500">atau</span>
-                    <div class="flex-grow border-t border-bordercolor"></div>
-                </div>
-                <button onclick="handleGuestLogin()" class="w-full bg-cardbg hover:bg-bordercolor text-gray-300 font-semibold py-2.5 rounded-lg border border-bordercolor transition text-sm">
-                    Masuk Mode Tamu / Demo
+                <button type="button" onclick="Auth.guestLogin()" class="w-full bg-darkbg hover:bg-bordercolor text-textgray font-mono py-2.5 rounded-lg border border-bordercolor transition text-xs">
+                    GUEST_DEMO_MODE
                 </button>
             </div>
-            <p class="text-xs text-gray-500 text-center mt-6">Data tersimpan 100% aman secara lokal di memori browser HP/Laptop milikmu.</p>
         </div>
     </div>
 
     <!-- Main Dashboard Screen -->
-    <div id="main-dashboard" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div id="main-dashboard" class="hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 relative z-10">
         
         <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-bordercolor pb-4 mb-6 gap-4">
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-bordercolor pb-4 mb-6 gap-4">
             <div>
                 <div class="flex items-center space-x-3">
-                    <h1 class="text-xl font-bold text-white">Dashboard Keuangan</h1>
-                    <span class="bg-accentgreen/10 text-accentgreen text-xs font-semibold px-2.5 py-0.5 rounded-full border border-accentgreen/20 flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-accentgreen animate-pulse"></span> Data Tersimpan Otomatis (Lokal)
+                    <h1 class="text-lg font-mono font-bold text-white tracking-wider">CODEZAN . HUB</h1>
+                    <span class="bg-accentemerald/10 text-accentemerald text-[10px] font-mono px-2 py-0.5 rounded border border-accentemerald/20 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-accentemerald animate-pulse"></span> ONLINE
                     </span>
                 </div>
-                <p class="text-xs text-gray-400 mt-0.5">Selamat datang kembali, <span id="user-display" class="text-white font-semibold">User</span></p>
+                <p class="text-[11px] font-mono text-textgray mt-0.5">ID: <span id="user-display" class="text-white">Zan</span> (175cm / 58kg)</p>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="exportToCSV()" class="bg-cardbg hover:bg-bordercolor text-xs text-gray-300 px-3 py-2 rounded-lg border border-bordercolor flex items-center space-x-2 transition">
-                    <i class="fas fa-download text-accentblue"></i>
-                    <span>Ekspor CSV</span>
+                <button type="button" onclick="Finance.syncFromCloud()" class="bg-cardbg hover:bg-bordercolor text-xs font-mono text-textgray px-3 py-1.5 rounded-lg border border-bordercolor flex items-center space-x-2 transition">
+                    <i class="fas fa-sync-alt text-accentemerald"></i>
+                    <span>Sync</span>
                 </button>
-                <button onclick="handleLogout()" class="bg-accentred/10 hover:bg-accentred/20 text-accentred border border-accentred/30 text-xs px-3 py-2 rounded-lg transition flex items-center space-x-2">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Keluar</span>
+                <button type="button" onclick="Auth.logout()" class="bg-darkbg hover:bg-bordercolor text-textgray border border-bordercolor text-xs font-mono px-3 py-1.5 rounded-lg transition">
+                    Logout
                 </button>
             </div>
         </header>
 
-        <!-- Metric Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-cardbg border border-bordercolor rounded-xl p-5 relative overflow-hidden shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-gray-400">Total Saldo Aktif</span>
-                    <i class="fas fa-wallet text-accentblue text-lg"></i>
-                </div>
-                <div id="display-total-balance" class="text-2xl font-bold text-white mb-3">Rp0</div>
-                <div class="flex space-x-2">
-                    <button onclick="openModal('topup-modal')" class="bg-accentgreen/20 hover:bg-accentgreen/30 text-accentgreen text-xs font-semibold px-2.5 py-1 rounded border border-accentgreen/30 transition">
-                        + Top Up
-                    </button>
-                    <button onclick="openModal('edit-balance-modal')" class="bg-bordercolor/50 hover:bg-bordercolor text-gray-300 text-xs font-semibold px-2.5 py-1 rounded transition">
-                        Edit Saldo
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor rounded-xl p-5 shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-gray-400">Batas Jajan Aman / Hari</span>
-                    <i class="fas fa-calendar-day text-accentyellow text-lg"></i>
-                </div>
-                <div id="display-daily-limit" class="text-2xl font-bold text-accentyellow mb-1">Rp0 / hari</div>
-                <p id="display-days-remaining" class="text-xs text-gray-500">Sisa 0 hari dalam bulan ini</p>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor rounded-xl p-5 shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-gray-400">Total Pemasukan</span>
-                    <i class="fas fa-arrow-down text-accentgreen text-lg"></i>
-                </div>
-                <div id="display-total-income" class="text-2xl font-bold text-accentgreen mb-1">Rp0</div>
-                <p class="text-xs text-gray-500">Akumulasi dana masuk</p>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor rounded-xl p-5 shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-gray-400">Total Pengeluaran</span>
-                    <i class="fas fa-arrow-up text-accentred text-lg"></i>
-                </div>
-                <div id="display-total-expense" class="text-2xl font-bold text-accentred mb-1">Rp0</div>
-                <p class="text-xs text-gray-500">Akumulasi dana terpakai</p>
-            </div>
+        <!-- Navigation Tabs -->
+        <div class="flex border-b border-bordercolor mb-6 space-x-8 text-xs font-mono">
+            <button id="tab-btn-finance" type="button" onclick="App.switchTab('finance')" class="nav-tab active pb-3 text-textgray hover:text-white flex items-center gap-2 transition">
+                <i class="fas fa-wallet text-accentemerald"></i> 01. FINANCE
+            </button>
+            <button id="tab-btn-workout" type="button" onclick="App.switchTab('workout')" class="nav-tab pb-3 text-textgray hover:text-white flex items-center gap-2 transition">
+                <i class="fas fa-dumbbell"></i> 02. WORKOUT SCHEDULE
+            </button>
+            <button id="tab-btn-code" type="button" onclick="App.switchTab('code')" class="nav-tab pb-3 text-textgray hover:text-white flex items-center gap-2 transition">
+                <i class="fas fa-code"></i> 03. CODE ENGINE
+            </button>
         </div>
 
-        <!-- Strategy Allocation & Form Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-cardbg border border-bordercolor rounded-xl p-6 lg:col-span-2">
-                <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-accentblue"></i> Strategi Alokasi Portofolio 70/30
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div class="bg-darkbg border border-bordercolor p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs text-gray-400">70% Dana Darurat / Likuid</span>
-                            <span class="text-xs text-accentgreen font-semibold">Bibit RDPU / SeaBank</span>
+        <!-- TAB 01: FINANCE -->
+        <div id="tab-content-finance" class="space-y-6">
+            <!-- Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[11px] font-mono text-textgray">TOTAL SALDO LIKUID</span>
+                        <i class="fas fa-wallet text-accentemerald"></i>
+                    </div>
+                    <div id="display-total-balance" class="text-2xl font-bold font-mono text-white mb-3">Rp0</div>
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="App.openModal('topup-modal')" class="bg-accentemerald/10 hover:bg-accentemerald/20 text-accentemerald text-[11px] font-mono font-semibold px-2.5 py-1 rounded border border-accentemerald/20 transition">
+                            + Top Up
+                        </button>
+                        <button type="button" onclick="App.openModal('edit-balance-modal')" class="bg-darkbg hover:bg-bordercolor text-textgray text-[11px] font-mono px-2.5 py-1 rounded border border-bordercolor transition">
+                            Kalibrasi
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[11px] font-mono text-textgray">BATAS JAJAN SAFE / HARI</span>
+                        <i class="fas fa-calendar-day text-accentemerald"></i>
+                    </div>
+                    <div id="display-daily-limit" class="text-2xl font-bold font-mono text-accentemerald mb-1">Rp0 / hari</div>
+                    <p id="display-days-remaining" class="text-[10px] font-mono text-textgray">Sisa 0 hari dalam bulan ini</p>
+                </div>
+
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[11px] font-mono text-textgray">TOTAL CASH INFLOW</span>
+                        <i class="fas fa-arrow-down text-accentemerald"></i>
+                    </div>
+                    <div id="display-total-income" class="text-2xl font-bold font-mono text-white mb-1">Rp0</div>
+                    <p class="text-[10px] font-mono text-textgray">Akumulasi Pemasukan</p>
+                </div>
+
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[11px] font-mono text-textgray">TOTAL CASH OUTFLOW</span>
+                        <i class="fas fa-arrow-up text-textgray"></i>
+                    </div>
+                    <div id="display-total-expense" class="text-2xl font-bold font-mono text-textgray mb-1">Rp0</div>
+                    <p class="text-[10px] font-mono text-textgray">Akumulasi Pengeluaran</p>
+                </div>
+            </div>
+
+            <!-- Portfolio 70/30 & Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-6 lg:col-span-2 space-y-4">
+                    <h2 class="text-xs font-mono font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-accentemerald"></i> ALOKASI PORTOFOLIO (70 / 30)
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-darkbg border border-bordercolor p-4 rounded-lg">
+                            <span class="text-[10px] font-mono text-textgray">70% LIKUID (BIBIT / SEABANK)</span>
+                            <div id="alloc-emergency" class="text-lg font-bold font-mono text-white mt-1">Rp0</div>
                         </div>
-                        <div id="alloc-emergency" class="text-xl font-bold text-white">Rp0</div>
-                        <p class="text-[11px] text-gray-500 mt-1">Pertumbuhan stabil, bebas risiko & bebas pajak PPh.</p>
-                    </div>
-
-                    <div class="bg-darkbg border border-bordercolor p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs text-gray-400">30% Aset Pertumbuhan</span>
-                            <span class="text-xs text-accentblue font-semibold">Stockbit BBRI/TLKM</span>
+                        <div class="bg-darkbg border border-bordercolor p-4 rounded-lg">
+                            <span class="text-[10px] font-mono text-textgray">30% GROWTH (STOCKBIT BBRI)</span>
+                            <div id="alloc-growth" class="text-lg font-bold font-mono text-white mt-1">Rp0</div>
                         </div>
-                        <div id="alloc-growth" class="text-xl font-bold text-white">Rp0</div>
-                        <p class="text-[11px] text-gray-500 mt-1">Fokus dividen yield & capital gain jangka panjang.</p>
+                    </div>
+                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg flex justify-between items-center text-xs font-mono">
+                        <span class="text-textgray">ESTIMASI YIELD BEBAS PAJAK (~5% P.A.):</span>
+                        <span id="estimated-yield" class="font-bold text-accentemerald">+Rp0 / thn</span>
                     </div>
                 </div>
 
-                <div class="border-t border-bordercolor pt-4">
-                    <div class="flex justify-between items-center text-xs text-gray-400 mb-2">
-                        <span>Estimasi Imbal Hasil Bebas Pajak (Yield ~5% p.a.)</span>
-                        <span id="tax-free-badge" class="text-accentgreen font-semibold">Pajak 0% (Di Bawah Rp7,5 Juta)</span>
-                    </div>
-                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg flex justify-between items-center">
-                        <span class="text-xs text-gray-300">Estimasi Pasif Income / Tahun dari 70% Dana Darurat:</span>
-                        <span id="estimated-yield" class="text-sm font-bold text-accentgreen">+Rp0 / thn</span>
-                    </div>
+                <!-- Input Form -->
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
+                    <h2 class="text-xs font-mono font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-accentemerald"></i> CATAT TRANSAKSI
+                    </h2>
+                    <form id="tx-form" onsubmit="Finance.handleAddTransaction(event)" class="space-y-3 font-mono">
+                        <div>
+                            <select id="tx-type" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald">
+                                <option value="expense">Pengeluaran (-)</option>
+                                <option value="income">Pemasukan (+)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="tx-category" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald">
+                                <option value="Makanan & Minuman">Makanan & High Protein</option>
+                                <option value="Membership Gym/Suplemen">Gym & Suplemen</option>
+                                <option value="Kuliah & Tugas">Kuliah & Tugas</option>
+                                <option value="Tabungan BBRI">BBRI / Stockbit</option>
+                                <option value="RDPU Bibit">Bibit / SeaBank</option>
+                                <option value="Grooming & Skincare">Grooming & Skincare</option>
+                                <option value="Lain-lain">Lain-lain</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="number" id="tx-amount" required class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald" placeholder="Nominal (Rp)">
+                        </div>
+                        <div>
+                            <input type="text" id="tx-desc" required class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald" placeholder="Deskripsi">
+                        </div>
+                        <button type="submit" class="w-full bg-accentemerald hover:bg-emerald-600 text-darkbg font-bold py-2.5 rounded-lg transition text-xs shadow-md">
+                            SIMPAN TRANSAKSI
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <!-- Form Tambah Transaksi -->
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
+                    <h2 class="text-xs font-mono font-bold text-white mb-4">DISTRIBUSI PENGELUARAN</h2>
+                    <div class="relative h-64"><canvas id="categoryChart"></canvas></div>
+                </div>
+                <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
+                    <h2 class="text-xs font-mono font-bold text-white mb-4">TREN OUTFLOW HARIAN</h2>
+                    <div class="relative h-64"><canvas id="dailyChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Table -->
             <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
-                <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-plus-circle text-accentgreen"></i> Catat Transaksi Baru
-                </h2>
-                <form id="tx-form" onsubmit="handleAddTransaction(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Tipe Transaksi</label>
-                        <select id="tx-type" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentblue">
-                            <option value="expense">Pengeluaran (-)</option>
-                            <option value="income">Pemasukan (+)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Kategori</label>
-                        <select id="tx-category" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentblue">
-                            <option value="Makanan & Minuman">Makanan & Minuman</option>
-                            <option value="Kuliah & Tugas">Kuliah & Tugas</option>
-                            <option value="Tabungan BBRI">Tabungan BBRI / Stockbit</option>
-                            <option value="RDPU Bibit">RDPU Bibit / SeaBank</option>
-                            <option value="Kebutuhan Harian">Kebutuhan Harian</option>
-                            <option value="Hiburan & Hobi">Hiburan & Hobi</option>
-                            <option value="Lain-lain">Lain-lain</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Nominal (Rp)</label>
-                        <input type="number" id="tx-amount" required class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentblue" placeholder="Contoh: 25000">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Deskripsi / Catatan</label>
-                        <input type="text" id="tx-desc" required class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentblue" placeholder="Contoh: Makan siang di kampus">
-                    </div>
-                    <button type="submit" class="w-full bg-accentgreen hover:bg-green-600 text-white font-semibold py-2.5 rounded-lg transition text-xs shadow-md mt-2">
-                        Simpan Transaksi
-                    </button>
-                </form>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xs font-mono font-bold text-white">AUDIT LOG TRANSAKSI</h2>
+                    <input type="text" id="table-search" oninput="Finance.renderTable()" placeholder="Cari..." class="bg-darkbg border border-bordercolor rounded-lg px-3 py-1 text-xs text-white font-mono focus:outline-none focus:border-accentemerald">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-mono text-textgray">
+                        <thead class="bg-darkbg text-white uppercase text-[10px]">
+                            <tr>
+                                <th class="py-3 px-4">Tanggal</th>
+                                <th class="py-3 px-4">Deskripsi</th>
+                                <th class="py-3 px-4">Kategori</th>
+                                <th class="py-3 px-4">Tipe</th>
+                                <th class="py-3 px-4 text-right">Nominal</th>
+                                <th class="py-3 px-4 text-center">Hapus</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tx-table-body" class="divide-y divide-bordercolor"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- TAB 02: WORKOUT SCHEDULE -->
+        <div id="tab-content-workout" class="hidden space-y-6">
+            <!-- Macro Calculator -->
             <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
-                <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-chart-donut text-accentblue"></i> Distribusi Kategori Pengeluaran
+                <h2 class="text-xs font-mono font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-calculator text-accentemerald"></i> KALKULATOR LEAN BULK
                 </h2>
-                <div class="relative h-64 flex items-center justify-center">
-                    <canvas id="categoryChart"></canvas>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 font-mono">
+                    <div>
+                        <label class="block text-[10px] text-textgray mb-1">TINGGI (CM)</label>
+                        <input type="number" id="body-height" value="175" onchange="Workout.calculateMacros()" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-textgray mb-1">BERAT SAAT INI (KG)</label>
+                        <input type="number" id="body-weight" value="58" onchange="Workout.calculateMacros()" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-textgray mb-1">TARGET BERAT (KG)</label>
+                        <input type="number" id="body-target" value="68" onchange="Workout.calculateMacros()" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-accentemerald">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg text-center">
+                        <span class="text-[10px] text-textgray">TARGET KALORI</span>
+                        <div id="macro-calories" class="text-base font-bold text-accentemerald mt-1">2,800 kcal</div>
+                    </div>
+                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg text-center">
+                        <span class="text-[10px] text-textgray">TARGET PROTEIN</span>
+                        <div id="macro-protein" class="text-base font-bold text-white mt-1">120 - 140 g</div>
+                    </div>
+                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg text-center">
+                        <span class="text-[10px] text-textgray">TARGET KARBO</span>
+                        <div id="macro-carbs" class="text-base font-bold text-white mt-1">350 - 380 g</div>
+                    </div>
+                    <div class="bg-darkbg border border-bordercolor p-3 rounded-lg text-center">
+                        <span class="text-[10px] text-textgray">AIR MINUM</span>
+                        <div id="macro-water" class="text-base font-bold text-accentemerald mt-1">3.0 - 3.5 L</div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Schedule -->
             <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
-                <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-chart-bar text-accentgreen"></i> Tren Pengeluaran Harian
-                </h2>
-                <div class="relative h-64 flex items-center justify-center">
-                    <canvas id="dailyChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- History Table Section -->
-        <div class="bg-cardbg border border-bordercolor rounded-xl p-6 mb-12">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-bordercolor gap-4">
-                <h2 class="text-sm font-semibold text-white flex items-center gap-2">
-                    <i class="fas fa-history text-gray-400"></i> Riwayat Transaksi Kebijakan
-                </h2>
-                <div class="flex items-center space-x-2">
-                    <input type="text" id="table-search" oninput="renderTable()" placeholder="Cari catatan..." class="bg-darkbg border border-bordercolor rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accentblue">
-                    <select id="table-filter" onchange="renderTable()" class="bg-darkbg border border-bordercolor rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accentblue">
-                        <option value="all">Semua Tipe</option>
-                        <option value="expense">Pengeluaran</option>
-                        <option value="income">Pemasukan</option>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-bordercolor gap-3 mb-4">
+                    <h2 class="text-xs font-mono font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-accentemerald"></i> PROGRAM LATIHAN & MEAL PLAN
+                    </h2>
+                    <select id="workout-day-select" onchange="Workout.renderSchedule()" class="bg-darkbg border border-bordercolor rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-accentemerald">
+                        <option value="senin">SENIN - GYM (PUSH)</option>
+                        <option value="selasa">SELASA - RECOVERY</option>
+                        <option value="rabu">RABU - GYM (PULL)</option>
+                        <option value="kamis">KAMIS - RECOVERY</option>
+                        <option value="jumat">JUMAT - GYM (LEGS + PRIORITY)</option>
+                        <option value="sabtu">SABTU - ACTIVE RECOVERY</option>
+                        <option value="minggu">MINGGU - TOTAL REST</option>
                     </select>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono" id="workout-details-container"></div>
             </div>
 
-            <div class="overflow-x-auto mt-4">
-                <table class="w-full text-left text-xs text-gray-300">
-                    <thead class="bg-darkbg text-gray-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="py-3 px-4">Tanggal</th>
-                            <th class="py-3 px-4">Deskripsi</th>
-                            <th class="py-3 px-4">Kategori</th>
-                            <th class="py-3 px-4">Tipe</th>
-                            <th class="py-3 px-4 text-right">Nominal</th>
-                            <th class="py-3 px-4 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tx-table-body" class="divide-y divide-bordercolor"></tbody>
-                </table>
+            <!-- Habits -->
+            <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
+                <h2 class="text-xs font-mono font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-accentemerald"></i> HABIT CHECKLIST HARIAN
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-skincare-am" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Skincare Pagi</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-protein" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Cukupi Protein</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-water" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Air 3 Liter</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-workout" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Sesi Gym</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-skincare-pm" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Skincare Malam</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-darkbg border border-bordercolor p-3 rounded-lg cursor-pointer">
+                        <input type="checkbox" id="habit-sleep" onchange="Workout.saveHabits()" class="rounded border-bordercolor bg-cardbg text-accentemerald focus:ring-0">
+                        <span class="text-textgray">Tidur 7-9 Jam</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 03: CODE ENGINE -->
+        <div id="tab-content-code" class="hidden space-y-6 font-mono">
+            <div class="bg-cardbg border border-bordercolor rounded-xl p-6">
+                <h2 class="text-xs font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fas fa-terminal text-accentemerald"></i> PYTHON ANALYTICS ENGINE
+                </h2>
+                <p class="text-xs text-textgray mb-4">Skrip analisis lokal WSL2 yang mengolah catatan transaksi keuangan & efisiensi protein harian.</p>
+                <div class="bg-darkbg border border-bordercolor rounded-lg p-4 text-xs text-accentemerald overflow-x-auto leading-relaxed">
+<pre><code># keuangan.py & workout.py
+import pandas as pd
+import numpy as np
+
+def run_analytics():
+    print("[SYSTEM] Reading transaction logs & macro efficiency...")
+    # Calculating 70/30 liquid asset growth
+    return True
+
+if __name__ == "__main__":
+    run_analytics()</code></pre>
+                </div>
             </div>
         </div>
 
     </div>
 
     <!-- Modals -->
-    <div id="topup-modal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-        <div class="bg-cardbg border border-bordercolor rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 class="text-base font-bold text-white mb-4">+ Top Up Saldo Utama</h3>
-            <input type="number" id="topup-amount" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-sm text-white mb-4 focus:outline-none focus:border-accentblue" placeholder="Nominal Top Up (Rp)">
+    <div id="topup-modal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+        <div class="bg-cardbg border border-bordercolor rounded-xl p-6 max-w-sm w-full font-mono">
+            <h3 class="text-xs font-bold text-white mb-4">+ TOP UP SALDO</h3>
+            <input type="number" id="topup-amount" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white mb-4 focus:outline-none focus:border-accentemerald" placeholder="Nominal (Rp)">
             <div class="flex justify-end space-x-2">
-                <button onclick="closeModal('topup-modal')" class="px-4 py-2 bg-bordercolor text-gray-300 rounded-lg text-xs">Batal</button>
-                <button onclick="handleTopUp()" class="px-4 py-2 bg-accentgreen text-white font-semibold rounded-lg text-xs">Simpan</button>
+                <button type="button" onclick="App.closeModal('topup-modal')" class="px-3 py-1.5 bg-darkbg text-textgray rounded-lg text-xs border border-bordercolor">Batal</button>
+                <button type="button" onclick="Finance.handleTopUp()" class="px-3 py-1.5 bg-accentemerald text-darkbg font-bold rounded-lg text-xs">Simpan</button>
             </div>
         </div>
     </div>
 
-    <div id="edit-balance-modal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-        <div class="bg-cardbg border border-bordercolor rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 class="text-base font-bold text-white mb-4">Edit Total Saldo Aktif</h3>
-            <input type="number" id="edit-balance-amount" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-sm text-white mb-4 focus:outline-none focus:border-accentblue" placeholder="Atur Ulang Total Saldo (Rp)">
+    <div id="edit-balance-modal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+        <div class="bg-cardbg border border-bordercolor rounded-xl p-6 max-w-sm w-full font-mono">
+            <h3 class="text-xs font-bold text-white mb-4">KALIBRASI SALDO</h3>
+            <input type="number" id="edit-balance-amount" class="w-full bg-darkbg border border-bordercolor rounded-lg px-3 py-2 text-xs text-white mb-4 focus:outline-none focus:border-accentemerald" placeholder="Set Saldo Baru (Rp)">
             <div class="flex justify-end space-x-2">
-                <button onclick="closeModal('edit-balance-modal')" class="px-4 py-2 bg-bordercolor text-gray-300 rounded-lg text-xs">Batal</button>
-                <button onclick="handleEditBalance()" class="px-4 py-2 bg-accentblue text-white font-semibold rounded-lg text-xs">Simpan Kalibrasi</button>
+                <button type="button" onclick="App.closeModal('edit-balance-modal')" class="px-3 py-1.5 bg-darkbg text-textgray rounded-lg text-xs border border-bordercolor">Batal</button>
+                <button type="button" onclick="Finance.handleEditBalance()" class="px-3 py-1.5 bg-accentemerald text-darkbg font-bold rounded-lg text-xs">Simpan</button>
             </div>
         </div>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="keuangan.js"></script>
+    <!-- ============================================ -->
+    <!-- URUTAN SCRIPT: main -> auth -> finance -> workout -->
+    <!-- ============================================ -->
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/workout.js"></script>
+    
+    <!-- Inisialisasi Akhir setelah semua script ter-load -->
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof Auth !== 'undefined') {
+                Auth.init();
+            } else {
+                console.error("Auth module failed to load. Check js/auth.js");
+            }
+        });
+    </script>
 </body>
 </html>
