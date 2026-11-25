@@ -1,0 +1,19 @@
+{
+  "name": "monitoring-keuangan-gym",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Aplikasi web (PWA) monitoring keuangan dan jadwal workout",
+  "scripts": {
+    "dev": "python server.py",
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "check": "npm test && npm run build",
+    "test:ui": "node tests/ui/smoke.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}
